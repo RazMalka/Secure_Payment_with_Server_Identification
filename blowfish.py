@@ -7,12 +7,14 @@ class Blowfish():
         self.s = const.s.copy()
         self.initialize(key)
 
+    # Swap between a and b
     def swap(self, a,b):
         temp = a
         a = b
         b = temp
         return a,b
 
+    # Initialize p-box using xor with 18 subkeys
     def initialize(self, key):
             for i in range(0,18):
                     self.p[i] = self.p[i]^key[i%14]
