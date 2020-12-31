@@ -41,7 +41,7 @@ class Server():
         print("Decrypted Blowfish Key:\t\t", self.blowfish_key)
         print("Blowfish Key Exchange Successful!\n")
 
-    def validate_payment(self, credit_card, security_code):
+    def validate_payment(self, credit_card, security_code, amount):
         bf_key = blowfish.Blowfish.generate_input_key(self.blowfish_key)
         bf = blowfish.Blowfish(bf_key)
 
@@ -50,4 +50,4 @@ class Server():
 
         print("Decrypted Credit Card:\t\t", decrypted_credit_card)
         print("Decrypted Security Code:\t", decrypted_security_code, "\n")
-        print("Authentication Successful!\n")
+        print("Payment Successful,", amount ,"Cookies Ordered!\n")

@@ -22,10 +22,10 @@ class Client():
             print("\nSent to server verification ... \nAwaiting response ... \n")
             validation_success = server.validate_credentials(username, password)
 
-        print("Login Successful!\n")
+        print("Login Successful!")
         
         self.blowfish_key_exchange(server)
-        self.order_cookies(server)
+        self.pay(server)
 
     def generate_private_key(self):
         self.private_key_multiplier = random.randint(1, self.ec.q)
@@ -70,16 +70,17 @@ class Client():
         # Additionally, we will need to pass here a digital signature somehow
         server.validate_blowfish_key_exchange(key_encrypted)
 
-    def order_cookies(self, server):
+    def pay(self, server):
         bf_key = blowfish.Blowfish.generate_input_key(self.blowfish_key)
         bf = blowfish.Blowfish(bf_key)
 
         credit_card = bf.encryption(int(input("Please Enter Credit Card:\t ")))
         security_code = bf.encryption(int(input("Please Enter Security Code:\t ")))
+        amount = int(input("Amount of Cookies Wanted:\t "))
 
         print("Encrypted Credit Card:\t\t", credit_card)
         print("Encrypted Security Code:\t", security_code)
         print("\nSent to server authentication ... \nAwaiting response ... \n")
 
         # Additionally, we will need to pass here a digital signature somehow        
-        server.validate_payment(credit_card, security_code)
+        server.validate_payment(credit_card, security_code, amount)
