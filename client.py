@@ -19,7 +19,7 @@ class Client():
             if (self.username is not ""):
                 print("Login Failed!\nInvalid username or password - try again\n")
             username, password = self.login_prompt()
-            print("\nSent to server verification ... \nAwaiting response ... \n")
+            print("\nSent to server authentication ... \nAwaiting response ... \n")
             validation_success = server.validate_credentials(username, password)
 
         print("Login Successful!")
