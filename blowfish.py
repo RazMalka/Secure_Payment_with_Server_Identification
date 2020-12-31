@@ -7,7 +7,7 @@ class Blowfish():
         Initialize new pbox and sbox for blowfish instance,
         and calls initialize for pbox.
         """
-        self.p_new = const.p.copy()
+        self.p_new = const.p.copy()  # p[i] is initialized with pi() values
         self.p = const.p.copy()
         self.s = const.s.copy()
         self.initialize(key)
@@ -21,6 +21,7 @@ class Blowfish():
         b = temp
         return a, b
 
+    # blabla
     def generate_input_key(key):
         """
         Generates a correctly formatted list of hexadecimal values from input key.
@@ -31,7 +32,7 @@ class Blowfish():
 
         key = hex(key)[2:]
         padding = (8 * 14) - len(key)
-        key = "0" * padding + key
+        key = "0" * padding + key  # add pading to the key
         n = 8
         res = [int(key[i:i+n], 16) for i in range(0, len(key), n)]
         key = res
@@ -42,6 +43,8 @@ class Blowfish():
         """
         Initialize p-box using xor with 18 subkeys.
         This function initializes the pbox with xor between it with input key.
+        The p[i] array is already initialized with pi() numbers
+        The new p[i] gets the value of oldP[i] xor key[i]
         """
         for i in range(0, 18):
             self.p[i] = self.p[i] ^ key[i % 14]
@@ -58,11 +61,12 @@ class Blowfish():
     def encryption(self, data):
         """
         This function performs encryption of data with blowfish.
+
         """
-        L = data >> 32
-        R = data & 0xffffffff
+        L = data >> 32  # get the left 32 bit
+        R = data & 0xffffffff  # get the right 32 bit
         for i in range(0, 16):
-            L = self.p[i] ^ L
+            L = self.p[i] ^ L  # xor with the p[i]
             L1 = self.func(L)
             R = R ^ self.func(L1)
             L, R = self.swap(L, R)
@@ -88,9 +92,10 @@ class Blowfish():
     def decryption(self, data):
         """
         This function performs decryption of data with blowfish.
+        The reverse of the encryption
         """
-        L = data >> 32
-        R = data & 0xffffffff
+        L = data >> 32  # get the left 32 bit
+        R = data & 0xffffffff  # get the right 32 bit
         for i in range(17, 1, -1):
             L = self.p[i] ^ L
             L1 = self.func(L)
