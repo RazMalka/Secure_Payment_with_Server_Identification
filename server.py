@@ -5,6 +5,7 @@ import blowfish
 import random
 import ecdsa
 
+
 class Server():
     def __init__(self, ec):
         """
@@ -22,14 +23,16 @@ class Server():
         """
         self.private_key_multiplier = random.randint(1, self.ec.q)
         self.private_key = self.ec.mul(self.ec.G, self.private_key_multiplier)
-        
+
     def generate_public_key(self, key):
         """
         This function generates a public key.
         """
-        self.Qa = key # Qa is the public key used to verify signatures
-        self.public_key = self.ec.mul(key, self.private_key_multiplier) # k1 * k2 * G
-        print("Generated Public Key:\t\t", self.public_key.y)
+        self.Qa = key  # Qa is the public key used to verify signatures
+        self.public_key = self.ec.mul(
+            key, self.private_key_multiplier)  # k1 * k2 * G
+        print("Generated Public Key:\t\t", self.public_key.x)
+        print("\t\t\t\t", self.public_key.y)
         return self.private_key
 
     def validate_credentials(self, username, password):
@@ -46,12 +49,15 @@ class Server():
         """
         result = ecdsa.Ecdsa.verify(self.ec, key_encrypted, signature, self.Qa)
         if (result is True):
-            print("Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully!")
+            print(
+                "Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully!")
         else:
-            print("Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA)")
+            print(
+                "Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA)")
             exit(1)
 
-        bfkey_decryption_key = blowfish.Blowfish.generate_input_key(self.public_key.y)
+        bfkey_decryption_key = blowfish.Blowfish.generate_input_key(
+            self.public_key.y)
         bf = blowfish.Blowfish(bfkey_decryption_key)
 
         self.blowfish_key = bf.decryption(key_encrypted)
@@ -67,9 +73,11 @@ class Server():
         """
         result = ecdsa.Ecdsa.verify(self.ec, credit_card, signature, self.Qa)
         if (result is True):
-            print("Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully!")
+            print(
+                "Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully!")
         else:
-            print("Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA)")
+            print(
+                "Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA)")
             exit(1)
 
         bf_key = blowfish.Blowfish.generate_input_key(self.blowfish_key)
@@ -80,4 +88,4 @@ class Server():
 
         print("Decrypted Credit Card:\t\t", decrypted_credit_card)
         print("Decrypted Security Code:\t", decrypted_security_code, "\n")
-        print("Payment Successful,", amount ,"Cookies Ordered!\n")
+        print("Payment Successful,", amount, "Cookies Ordered!\n")

@@ -1,7 +1,11 @@
 # Secure payment with server identification using Elliptic protocol signature and key exchange,
 # encryption-decryption with Blowfish checking with SHA-256.
 
-import client, server, elliptic, collections
+import client
+import server
+import elliptic
+import collections
+
 
 def start():
     """
@@ -9,7 +13,7 @@ def start():
     """
     # Define a Coordinate Tuple
     Coord = collections.namedtuple("Coord", ["x", "y"])
-    
+
     # Initialize an elliptic curve
     big_prime = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f
     order = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
@@ -22,5 +26,6 @@ def start():
 
     # Initialize a client
     cl = client.Client(sv, ec)
+
 
 start()

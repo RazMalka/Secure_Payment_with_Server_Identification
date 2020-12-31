@@ -1,5 +1,8 @@
 import binascii as bs
-import sha256, random, elliptic
+import sha256
+import random
+import elliptic
+
 
 class Ecdsa:
     @classmethod
@@ -9,15 +12,16 @@ class Ecdsa:
         """
         hashMessage_temp = sha256.sha_256(str(message))
         hashMessage = ''.join(str(w) for w in hashMessage_temp)
-        numberMessage = cls.stringToNumber(hashMessage)
-        
+        z = cls.stringToNumber(hashMessage)
+
         r, s = 0, 0
         curvePoint = None
         while r == 0 or s == 0:
             k = random.randint(1, ec.order - 1)
             curvePoint = ec.mul(ec.G, k)
             r = curvePoint.x % ec.order
-            s = ((numberMessage + r * privateNumber) * (elliptic.inv(k, ec.order))) % ec.order
+            s = ((z + r * privateNumber) *
+                 (elliptic.inv(k, ec.order))) % ec.order
         signature = [r, s]
         return signature
 
@@ -28,12 +32,12 @@ class Ecdsa:
         """
         hashMessage_temp = sha256.sha_256(str(message))
         hashMessage = ''.join(str(w) for w in hashMessage_temp)
-        numberMessage = cls.stringToNumber(hashMessage)
+        z = cls.stringToNumber(hashMessage)
 
         sigR = signature[0]
         sigS = signature[1]
         inv = elliptic.inv(sigS, ec.order)
-        u1 = (numberMessage * inv) % ec.order
+        u1 = (z * inv) % ec.order
         u2 = (sigR * inv) % ec.order
         u1_res = ec.mul(ec.G, u1)
         u2_res = ec.mul(publicKey, u2)

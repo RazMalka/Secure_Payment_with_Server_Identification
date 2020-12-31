@@ -2,9 +2,13 @@
 
 import collections
 
+Coord = collections.namedtuple("Coord", ["x", "y"])
+
+
 def inv(n, q):
     """div on PN modulo a/b mod q as a * inv(b, q) mod q """
     return egcd(n, q)[0] % q
+
 
 def egcd(a, b):
     """extended GCD
@@ -18,6 +22,7 @@ def egcd(a, b):
         pass
     return s0, t0, a
 
+
 def sqrt(ysq, q):
     """sqrt on PN modulo: returns two numbers or exception if not exist"""
     assert ysq < q
@@ -27,17 +32,17 @@ def sqrt(ysq, q):
         pass
     raise Exception("not found")
 
-Coord = collections.namedtuple("Coord", ["x", "y"])
 
 class EC(object):
     """System of Elliptic Curve"""
+
     def __init__(self, a, b, q, G, order):
         """elliptic curve as: (y**2 = x**3 + a * x + b) mod q
         - a, b: params of curve formula
         - q: prime number
         """
         assert 0 <= a and a < q and 0 <= b and b < q and q > 2
-        assert (4 * (a ** 3) + 27 * (b ** 2))  % q != 0
+        assert (4 * (a ** 3) + 27 * (b ** 2)) % q != 0
         self.a = a
         self.b = b
         self.q = q
@@ -47,7 +52,8 @@ class EC(object):
         pass
 
     def is_valid(self, p):
-        if p == self.zero: return True
+        if p == self.zero:
+            return True
         l = (p.y ** 2) % self.q
         r = ((p.x ** 3) + self.a * p.x + self.b) % self.q
         return l == r
@@ -66,10 +72,12 @@ class EC(object):
         """negate p"""
         return Coord(p.x, -p.y % self.q)
 
-    def add(self, p1:Coord, p2:Coord):
+    def add(self, p1: Coord, p2: Coord):
         """<add> of elliptic curve: negate of 3rd cross point of (p1,p2) line"""
-        if p1 == self.zero: return p2
-        if p2 == self.zero: return p1
+        if p1 == self.zero:
+            return p2
+        if p2 == self.zero:
+            return p1
         if p1.x == p2.x and (p1.y != p2.y or p1.y == 0):
             # p1 + -p1 == 0
             return self.zero
