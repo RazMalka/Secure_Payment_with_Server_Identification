@@ -63,8 +63,8 @@ class Blowfish():
         R = data & 0xffffffff
         for i in range(0, 16):
             L = self.p[i] ^ L
-            L1 = self.func(L)
-            R = R ^ self.func(L1)
+            L1 = self.F(L)
+            R = R ^ self.F(L1)
             L, R = self.swap(L, R)
         L, R = self.swap(L, R)
         L = L ^ self.p[17]
@@ -72,7 +72,7 @@ class Blowfish():
         encrypted = (L << 32) ^ R
         return encrypted
 
-    def func(self, L):
+    def F(self, L):
         """
         The F-function splits the 32-bit input into four eight-bit quarters,
         and uses the quarters as input to the S-boxes.
@@ -93,8 +93,8 @@ class Blowfish():
         R = data & 0xffffffff
         for i in range(17, 1, -1):
             L = self.p[i] ^ L
-            L1 = self.func(L)
-            R = R ^ self.func(L1)
+            L1 = self.F(L)
+            R = R ^ self.F(L1)
             L, R = self.swap(L, R)
         L, R = self.swap(L, R)
         L = L ^ self.p[0]
