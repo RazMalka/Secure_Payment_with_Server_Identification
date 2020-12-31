@@ -22,7 +22,7 @@ class Server():
     def generate_public_key(self, key):
         self.public_key = self.ec.mul(key, self.private_key_multiplier)
         print("Generated Public Key:\t\t", self.public_key.y)
-        return self.public_key
+        return self.private_key
 
     def validate_credentials(self, username, password):
         """

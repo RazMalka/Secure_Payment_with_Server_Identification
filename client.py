@@ -32,7 +32,7 @@ class Client():
         self.private_key = self.ec.mul(self.ec.G, self.private_key_multiplier)
 
     def generate_public_key(self, server):
-        self.public_key = server.generate_public_key(self.private_key)
+        self.public_key = self.ec.mul(server.generate_public_key(self.private_key), self.private_key_multiplier)
 
     def login_prompt(self):
         """
