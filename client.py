@@ -3,6 +3,7 @@
 import sha256
 import blowfish
 import random
+import ecdsa
 
 class Client():
     def __init__(self, server, ec):
@@ -28,10 +29,16 @@ class Client():
         self.pay(server)
 
     def generate_private_key(self):
+        """
+        This function generates a private key.
+        """
         self.private_key_multiplier = random.randint(1, self.ec.q)
         self.private_key = self.ec.mul(self.ec.G, self.private_key_multiplier)
 
     def generate_public_key(self, server):
+        """
+        This function generates a public key.
+        """
         self.public_key = self.ec.mul(server.generate_public_key(self.private_key), self.private_key_multiplier)
 
     def login_prompt(self):
@@ -46,12 +53,8 @@ class Client():
 
     def blowfish_key_exchange(self, server):
         """
-        This function allows ordering cookies.
+        This function requests performing key exchange for blowfish.
         """
-        
-        # Here will be code for Elliptical Curve Digital Signature Algorithm and Key Exchange
-        # ###################################################################################
-
         # Randomly Generated Blowfish Input Key
         self.blowfish_key = random.randint(10**10, 11**10 - 1)
 
@@ -67,10 +70,15 @@ class Client():
         print("Encrypted Blowfish Key:\t\t", key_encrypted)
         print("\nSent to server authentication ... \nAwaiting response ... \n")
 
-        # Additionally, we will need to pass here a digital signature somehow
-        server.validate_blowfish_key_exchange(key_encrypted)
+        signature = ecdsa.Ecdsa.sign(self.ec, key_encrypted, self.private_key_multiplier)
+        server.validate_blowfish_key_exchange(key_encrypted, signature)
 
     def pay(self, server):
+        """
+        This function requests performing a payment.
+        It encrypts the data using blowfish,
+        and also signs it to verify authenticity later on.
+        """
         bf_key = blowfish.Blowfish.generate_input_key(self.blowfish_key)
         bf = blowfish.Blowfish(bf_key)
 
@@ -81,6 +89,6 @@ class Client():
         print("Encrypted Credit Card:\t\t", credit_card)
         print("Encrypted Security Code:\t", security_code)
         print("\nSent to server authentication ... \nAwaiting response ... \n")
-
-        # Additionally, we will need to pass here a digital signature somehow        
-        server.validate_payment(credit_card, security_code, amount)
+        
+        signature = ecdsa.Ecdsa.sign(self.ec, credit_card, self.private_key_multiplier)
+        server.validate_payment(credit_card, security_code, amount, signature)

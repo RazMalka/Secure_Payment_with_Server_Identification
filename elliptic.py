@@ -1,6 +1,5 @@
 # Elliptic Curve Implementation
 
-# Basics of Elliptic Curve Cryptography implementation on Python
 import collections
 
 def inv(n, q):
@@ -32,19 +31,19 @@ Coord = collections.namedtuple("Coord", ["x", "y"])
 
 class EC(object):
     """System of Elliptic Curve"""
-    def __init__(self, a, b, q, G):
+    def __init__(self, a, b, q, G, order):
         """elliptic curve as: (y**2 = x**3 + a * x + b) mod q
         - a, b: params of curve formula
         - q: prime number
         """
-        assert 0 < a and a < q and 0 < b and b < q and q > 2
+        assert 0 <= a and a < q and 0 <= b and b < q and q > 2
         assert (4 * (a ** 3) + 27 * (b ** 2))  % q != 0
         self.a = a
         self.b = b
         self.q = q
         self.G = G
-        # just as unique ZERO value representation for "add": (not on curve)
         self.zero = Coord(0, 0)
+        self.order = order
         pass
 
     def is_valid(self, p):
@@ -67,7 +66,7 @@ class EC(object):
         """negate p"""
         return Coord(p.x, -p.y % self.q)
 
-    def add(self, p1, p2):
+    def add(self, p1:Coord, p2:Coord):
         """<add> of elliptic curve: negate of 3rd cross point of (p1,p2) line"""
         if p1 == self.zero: return p2
         if p2 == self.zero: return p1
@@ -79,7 +78,9 @@ class EC(object):
             l = (3 * p1.x * p1.x + self.a) * inv(2 * p1.y, self.q) % self.q
             pass
         else:
-            l = (p2.y - p1.y) * inv(p2.x - p1.x, self.q) % self.q
+            temp1 = (p2.y - p1.y)
+            temp2 = inv(p2.x - p1.x, self.q)
+            l = temp1 * temp2 % self.q
             pass
         x = (l * l - p1.x - p2.x) % self.q
         y = (l * (p1.x - x) - p1.y) % self.q
@@ -98,7 +99,7 @@ class EC(object):
             pass
         return r
 
-    def order(self, g):
+    def _order(self, g):
         """order of point g"""
         assert self.is_valid(g) and g != self.zero
         for i in range(1, self.q + 1):
