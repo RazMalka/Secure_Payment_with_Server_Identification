@@ -1,9 +1,9 @@
 # This is a client
 
-import sha256
 import blowfish
 import random
 import ecdsa
+import hashlib
 
 
 class Client():
@@ -13,46 +13,53 @@ class Client():
         including login and proceeding to order the cookies.
         """
         self.ec = ec
-        self.generate_private_key()
-        self.generate_public_key(server)
         self.username = ""
-        validation_success = False
-        while (validation_success is False):
-            if (self.username is not ""):
-                print("Login Failed!\nInvalid username or password - try again\n")
-            username, password = self.login_prompt()
-            print("\nSent to server authentication ... \nAwaiting response ... \n")
-            validation_success = server.validate_credentials(
-                username, password)
 
+        # Key Exchange
+        self.key_exchange(server)
+        print("Key Exchange Successful!")
+
+        # Login Form
+        self.login(server)
         print("Login Successful!")
 
-        self.blowfish_key_exchange(server)
+        # Payment Form
         self.pay(server)
 
-    def generate_private_key(self):
+    def key_exchange(self, server):
         """
-        This function generates a private key.
+        This function calls all of the relevant key exchange functions,
+        including private, public, shared and blowfish keys.
         """
-        self.private_key_multiplier = random.randint(1, self.ec.q)
-        self.private_key = self.ec.mul(self.ec.G, self.private_key_multiplier)
+        self.generate_keys()
+        self.generate_shared_key(server)
+        self.blowfish_key_exchange(server)
 
-    def generate_public_key(self, server):
+    def generate_keys(self):
         """
-        This function generates a public key.
+        This function generates a private and public keys.
         """
-        self.public_key = self.ec.mul(server.generate_public_key(
-            self.private_key), self.private_key_multiplier)
+        self.private_key = random.randint(1, self.ec.q)
+        self.public_key = self.ec.mul(self.ec.G, self.private_key)
 
-    def login_prompt(self):
+    def generate_shared_key(self, server):
         """
-        This function prompts a login form,
-        and hashes the inputted password with a sha-256 hash.
+        This function generates a shared key.
         """
-        self.username = input("Enter Username: ")
-        input_password = sha256.sha_256(input("Enter Password: "))
-        self.password = ''.join(str(w) for w in input_password)
-        return self.username, self.password
+        signature = ecdsa.Ecdsa.sign(
+            self.ec, self.public_key, self.private_key)
+
+        returned_public_key, returned_signature = server.generate_shared_key(
+            self.public_key, signature)
+
+        self.Qa = returned_public_key
+        self.verify_signature(
+            returned_public_key, returned_signature, "Public Key from Server")
+
+        self.shared_key = self.ec.mul(returned_public_key, self.private_key)
+
+        print("Generated Shared Key:\t\t", self.shared_key.x)
+        print("\t\t\t\t", self.shared_key.y)
 
     def blowfish_key_exchange(self, server):
         """
@@ -63,7 +70,7 @@ class Client():
 
         # Generate an Encryption Key for the Blowfish Key
         bfkey_encryption_key = blowfish.Blowfish.generate_input_key(
-            self.public_key.y)
+            self.shared_key.y)
         bf = blowfish.Blowfish(bfkey_encryption_key)
 
         # It will be encrypted by the public key of elliptic curve
@@ -75,8 +82,36 @@ class Client():
         print("\nSent to server authentication ... \nAwaiting response ... \n")
 
         signature = ecdsa.Ecdsa.sign(
-            self.ec, key_encrypted, self.private_key_multiplier)
+            self.ec, key_encrypted, self.private_key)
         server.validate_blowfish_key_exchange(key_encrypted, signature)
+
+    def login(self, server):
+        """
+        This function takes care of a login loop until valid parameters are inputted.
+        """
+        validation_success = False
+        while (validation_success is False):
+            if (self.username is not ""):
+                print("Login Failed!\nInvalid username or password - try again\n")
+
+            username, password = self.login_prompt()
+            print("\nSent to server authentication ... \nAwaiting response ... \n")
+
+            signature = ecdsa.Ecdsa.sign(
+                self.ec, username + password, self.private_key)
+
+            validation_success = server.validate_credentials(
+                username, password, signature)
+
+    def login_prompt(self):
+        """
+        This function prompts a login form,
+        and hashes the inputted password with a sha-256 hash.
+        """
+        self.username = input("Enter Username: ")
+        input_password = self.sha256(input("Enter Password: "))
+        self.password = ''.join(str(w) for w in input_password)
+        return self.username, self.password
 
     def pay(self, server):
         """
@@ -97,5 +132,23 @@ class Client():
         print("\nSent to server authentication ... \nAwaiting response ... \n")
 
         signature = ecdsa.Ecdsa.sign(
-            self.ec, credit_card, self.private_key_multiplier)
+            self.ec, credit_card + security_code, self.private_key)
         server.validate_payment(credit_card, security_code, amount, signature)
+
+    def verify_signature(self, message, signature, purpose):
+        """
+        This function calls the ECDSA verify function with required parameters,
+        and prints the result. If the result is false, it exists with code 1.
+        """
+        result = ecdsa.Ecdsa.verify(
+            self.ec, message, signature, self.Qa)
+        if (result is True):
+            print(
+                "Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully! -", purpose)
+        else:
+            print(
+                "Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA) -", purpose)
+            exit(1)
+
+    def sha256(self, input_string):
+        return hashlib.sha256(str(input_string).encode('utf-8')).hexdigest()

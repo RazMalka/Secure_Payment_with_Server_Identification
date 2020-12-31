@@ -1,7 +1,7 @@
 import binascii as bs
-import sha256
 import random
 import elliptic
+import hashlib
 
 
 class Ecdsa:
@@ -10,7 +10,7 @@ class Ecdsa:
         """
         This method signs messages through ECDSA Algorithm.
         """
-        hashMessage_temp = sha256.sha_256(str(message))
+        hashMessage_temp = cls.sha256(str(message))
         hashMessage = ''.join(str(w) for w in hashMessage_temp)
         z = cls.stringToNumber(hashMessage)
 
@@ -30,7 +30,7 @@ class Ecdsa:
         """
         This method verifies messages through ECDSA Algorithm.
         """
-        hashMessage_temp = sha256.sha_256(str(message))
+        hashMessage_temp = cls.sha256(str(message))
         hashMessage = ''.join(str(w) for w in hashMessage_temp)
         z = cls.stringToNumber(hashMessage)
 
@@ -47,3 +47,7 @@ class Ecdsa:
     @classmethod
     def stringToNumber(cls, string):
         return int(bs.hexlify(str.encode(string)), 16)
+
+    @classmethod
+    def sha256(cls, input_string):
+        return hashlib.sha256(str(input_string).encode('utf-8')).hexdigest()

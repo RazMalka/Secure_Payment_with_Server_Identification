@@ -13,51 +13,53 @@ class Server():
         simulated variables username and hashed password.
         """
         self.ec = ec
-        self.generate_private_key()
         self.simulation_username = "dima"
-        self.simulation_hashed_password = "3ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
+        self.simulation_hashed_password = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"
 
-    def generate_private_key(self):
-        """
-        This function generates a private key.
-        """
-        self.private_key_multiplier = random.randint(1, self.ec.q)
-        self.private_key = self.ec.mul(self.ec.G, self.private_key_multiplier)
+        # Key Exchange
+        self.generate_keys()
 
-    def generate_public_key(self, key):
+    def generate_keys(self):
         """
-        This function generates a public key.
+        This function generates a private and public keys.
+        """
+        self.private_key = random.randint(1, self.ec.q)
+        self.public_key = self.ec.mul(self.ec.G, self.private_key)
+
+    def generate_shared_key(self, key, signature):
+        """
+        This function generates a shared key.
         """
         self.Qa = key  # Qa is the public key used to verify signatures
-        self.public_key = self.ec.mul(
-            key, self.private_key_multiplier)  # k1 * k2 * G
-        print("Generated Public Key:\t\t", self.public_key.x)
-        print("\t\t\t\t", self.public_key.y)
-        return self.private_key
+        self.verify_signature(
+            key, signature, "Public Key from Client")
 
-    def validate_credentials(self, username, password):
+        self.shared_key = self.ec.mul(
+            key, self.private_key)  # k1 * k2 * G
+
+        returned_signature = ecdsa.Ecdsa.sign(
+            self.ec, self.public_key, self.private_key)
+        return self.public_key, returned_signature
+
+    def validate_credentials(self, username, password, signature):
         """
         This function validates credentials.
         For simulation purposes, it is for a predefined user "Dima",
         with password 1234 hashed with 256-sha algorithm.
         """
+        self.verify_signature(username + password, signature,
+                              "Login Credentials")
         return (username == self.simulation_username and password == self.simulation_hashed_password)
 
     def validate_blowfish_key_exchange(self, key_encrypted, signature):
         """
         This function validates the key exchange for blowfish.
         """
-        result = ecdsa.Ecdsa.verify(self.ec, key_encrypted, signature, self.Qa)
-        if (result is True):
-            print(
-                "Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully!")
-        else:
-            print(
-                "Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA)")
-            exit(1)
+        self.verify_signature(key_encrypted, signature,
+                              "Received Blowfish Key")
 
         bfkey_decryption_key = blowfish.Blowfish.generate_input_key(
-            self.public_key.y)
+            self.shared_key.y)
         bf = blowfish.Blowfish(bfkey_decryption_key)
 
         self.blowfish_key = bf.decryption(key_encrypted)
@@ -71,14 +73,8 @@ class Server():
         In addition to standard decryption of sent data,
         it also validates the authenticity of the sender's identity.
         """
-        result = ecdsa.Ecdsa.verify(self.ec, credit_card, signature, self.Qa)
-        if (result is True):
-            print(
-                "Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully!")
-        else:
-            print(
-                "Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA)")
-            exit(1)
+        self.verify_signature(credit_card + security_code,
+                              signature, "Received Credit Info")
 
         bf_key = blowfish.Blowfish.generate_input_key(self.blowfish_key)
         bf = blowfish.Blowfish(bf_key)
@@ -89,3 +85,18 @@ class Server():
         print("Decrypted Credit Card:\t\t", decrypted_credit_card)
         print("Decrypted Security Code:\t", decrypted_security_code, "\n")
         print("Payment Successful,", amount, "Cookies Ordered!\n")
+
+    def verify_signature(self, message, signature, purpose):
+        """
+        This function calls the ECDSA verify function with required parameters,
+        and prints the result. If the result is false, it exists with code 1.
+        """
+        result = ecdsa.Ecdsa.verify(
+            self.ec, message, signature, self.Qa)
+        if (result is True):
+            print(
+                "Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully! -", purpose)
+        else:
+            print(
+                "Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA) -", purpose)
+            exit(1)

@@ -6,13 +6,13 @@ Coord = collections.namedtuple("Coord", ["x", "y"])
 
 
 def inv(n, q):
-    """div on PN modulo a/b mod q as a * inv(b, q) mod q """
+    """Find the inverse on n modulus q """
     return egcd(n, q)[0] % q
 
 
 def egcd(a, b):
-    """extended GCD
-    returns: (s, t, gcd) as a*s + b*t == gcd
+    """extended GCD according to euclid's algorithm
+    finds (s, t) such that a*s + b*t == gcd
     """
     s0, s1, t0, t1 = 1, 0, 0, 1
     while b > 0:
@@ -23,19 +23,7 @@ def egcd(a, b):
     return s0, t0, a
 
 
-def sqrt(ysq, q):
-    """sqrt on PN modulo: returns two numbers or exception if not exist"""
-    assert ysq < q
-    for i in range(1, q):
-        if i * i % q == ysq:
-            return (i, q - i)
-        pass
-    raise Exception("not found")
-
-
 class EC(object):
-    """System of Elliptic Curve"""
-
     def __init__(self, a, b, q, G, order):
         """elliptic curve as: (y**2 = x**3 + a * x + b) mod q
         - a, b: params of curve formula
@@ -51,29 +39,8 @@ class EC(object):
         self.order = order
         pass
 
-    def is_valid(self, p):
-        if p == self.zero:
-            return True
-        l = (p.y ** 2) % self.q
-        r = ((p.x ** 3) + self.a * p.x + self.b) % self.q
-        return l == r
-
-    def at(self, x):
-        """find points on curve at x
-        - x: int < q
-        - returns: ((x, y), (x,-y)) or not found exception
-        """
-        assert x < self.q
-        ysq = (x ** 3 + self.a * x + self.b) % self.q
-        y, my = sqrt(ysq, self.q)
-        return Coord(x, y), Coord(x, my)
-
-    def neg(self, p):
-        """negate p"""
-        return Coord(p.x, -p.y % self.q)
-
     def add(self, p1: Coord, p2: Coord):
-        """<add> of elliptic curve: negate of 3rd cross point of (p1,p2) line"""
+        """This function returns the addition of two points on the elliptic curve"""
         if p1 == self.zero:
             return p2
         if p2 == self.zero:
@@ -95,7 +62,7 @@ class EC(object):
         return Coord(x, y)
 
     def mul(self, p, n):
-        """n times <mul> of elliptic curve"""
+        """This function returns the nth multiplication of a point on the elliptic curve"""
         r = self.zero
         m2 = p
 
@@ -106,13 +73,3 @@ class EC(object):
             n, m2 = n >> 1, self.add(m2, m2)
             pass
         return r
-
-    def _order(self, g):
-        """order of point g"""
-        assert self.is_valid(g) and g != self.zero
-        for i in range(1, self.q + 1):
-            if self.mul(g, i) == self.zero:
-                return i
-            pass
-        raise Exception("Invalid order")
-    pass
