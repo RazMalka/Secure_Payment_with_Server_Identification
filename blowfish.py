@@ -21,6 +21,7 @@ class Blowfish():
         b = temp
         return a, b
 
+    @staticmethod
     def generate_input_key(key):
         """
         Generates a correctly formatted list of hexadecimal values from input key.

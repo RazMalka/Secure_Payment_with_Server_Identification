@@ -66,7 +66,7 @@ class Client():
         This function requests performing key exchange for blowfish.
         """
         # Randomly Generated 64-bit Blowfish Input Key
-        self.blowfish_key = random.randint(2**54, 2**64)
+        self.blowfish_key = random.randint(2**54, 2**64 - 1)
 
         # Generate an Encryption Key for the Blowfish Key
         bfkey_encryption_key = blowfish.Blowfish.generate_input_key(
