@@ -2,13 +2,17 @@
 
 import sha256
 import blowfish
+import random
 
 class Client():
-    def __init__(self, server):
+    def __init__(self, server, ec):
         """
         This function initializes the client and its processes,
         including login and proceeding to order the cookies.
         """
+        self.ec = ec
+        self.generate_private_key()
+        self.generate_public_key(server)
         self.username = ""
         validation_success = False
         while (validation_success is False):
@@ -20,7 +24,15 @@ class Client():
 
         print("Login Successful!\n")
         
+        self.blowfish_key_exchange(server)
         self.order_cookies(server)
+
+    def generate_private_key(self):
+        self.private_key_multiplier = random.randint(1, self.ec.q)
+        self.private_key = self.ec.mul(self.ec.G, self.private_key_multiplier)
+
+    def generate_public_key(self, server):
+        self.public_key = server.generate_public_key(self.private_key)
 
     def login_prompt(self):
         """
@@ -32,7 +44,7 @@ class Client():
         self.password = ''.join(str(w) for w in input_password)
         return self.username, self.password
 
-    def order_cookies(self, server):
+    def blowfish_key_exchange(self, server):
         """
         This function allows ordering cookies.
         """
@@ -40,23 +52,34 @@ class Client():
         # Here will be code for Elliptical Curve Digital Signature Algorithm and Key Exchange
         # ###################################################################################
 
-        # Generated Somehow from a text or something
-        key = [ 0x61626364, 0x65666768, 0x696a6b6c, 0x6d6e6f70,
-            0x71727374, 0x75767778, 0x797a6162, 0x63646566,
-            0x6768696a, 0x6b6c6d6e, 0x6f707172, 0x73747576,
-            0x7778797a, 0x61626364 ]
+        # Randomly Generated Blowfish Input Key
+        self.blowfish_key = random.randint(10**10, 11**10 - 1)
+
+        # Generate an Encryption Key for the Blowfish Key
+        bfkey_encryption_key = blowfish.Blowfish.generate_input_key(self.public_key.y)
+        bf = blowfish.Blowfish(bfkey_encryption_key)
 
         # It will be encrypted by the public key of elliptic curve
         # Before it will be sent to the server
-        key_encrypted = key.copy()
+        key_encrypted = bf.encryption(self.blowfish_key)
 
-        bf = blowfish.Blowfish(key)
+        print("\nBlowfish Key before Encryption:\t", self.blowfish_key)
+        print("Encrypted Blowfish Key:\t\t", key_encrypted)
+        print("\nSent to server authentication ... \nAwaiting response ... \n")
+
+        # Additionally, we will need to pass here a digital signature somehow
+        server.validate_blowfish_key_exchange(key_encrypted)
+
+    def order_cookies(self, server):
+        bf_key = blowfish.Blowfish.generate_input_key(self.blowfish_key)
+        bf = blowfish.Blowfish(bf_key)
+
         credit_card = bf.encryption(int(input("Please Enter Credit Card:\t ")))
         security_code = bf.encryption(int(input("Please Enter Security Code:\t ")))
 
-        print("\nEncrypted Credit Card:\t\t", credit_card)
+        print("Encrypted Credit Card:\t\t", credit_card)
         print("Encrypted Security Code:\t", security_code)
-
         print("\nSent to server authentication ... \nAwaiting response ... \n")
+
         # Additionally, we will need to pass here a digital signature somehow        
-        server.validate_payment(credit_card, security_code, key_encrypted)
+        server.validate_payment(credit_card, security_code)

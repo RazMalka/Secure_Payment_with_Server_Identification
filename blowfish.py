@@ -13,7 +13,22 @@ class Blowfish():
         a = b
         b = temp
         return a,b
+    
+    # Generates a correctly formatted list of hexadecimal values from input key
+    def generate_input_key(key):
+        if (len(hex(key)) > 8 * 14):
+            print("Key Too Long!")
+            exit(1)
+        
+        key = hex(key)[2:]
+        padding = (8 * 14) - len(key)
+        key = "0" * padding + key
+        n = 8
+        res = [int(key[i:i+n], 16) for i in range(0, len(key), n)]
+        key = res
 
+        return key
+        
     # Initialize p-box using xor with 18 subkeys
     def initialize(self, key):
             for i in range(0,18):

@@ -32,7 +32,7 @@ Coord = collections.namedtuple("Coord", ["x", "y"])
 
 class EC(object):
     """System of Elliptic Curve"""
-    def __init__(self, a, b, q):
+    def __init__(self, a, b, q, G):
         """elliptic curve as: (y**2 = x**3 + a * x + b) mod q
         - a, b: params of curve formula
         - q: prime number
@@ -42,6 +42,7 @@ class EC(object):
         self.a = a
         self.b = b
         self.q = q
+        self.G = G
         # just as unique ZERO value representation for "add": (not on curve)
         self.zero = Coord(0, 0)
         pass
