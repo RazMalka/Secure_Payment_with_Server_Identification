@@ -12,16 +12,18 @@ class Client():
         This function initializes the client and its processes,
         including login and proceeding to order the cookies.
         """
+        print("\n", "-"*24, "\n")
+
         self.ec = ec
         self.username = ""
 
         # Key Exchange
         self.key_exchange(server)
-        print("Key Exchange Successful!")
+        print("Key Exchange Successful!\n\n", "-"*24, "\n")
 
         # Login Form
         self.login(server)
-        print("Login Successful!")
+        print("\nLogin Successful!\n\n", "-"*24, "\n\n")
 
         # Payment Form
         self.pay(server)
@@ -59,7 +61,7 @@ class Client():
         self.shared_key = self.ec.mul(returned_public_key, self.private_key)
 
         print("Generated Shared Key:\t\t", self.shared_key.x)
-        print("\t\t\t\t", self.shared_key.y)
+        print("\t\t\t\t", self.shared_key.y, "\n\n", "-"*24, "\n")
 
     def blowfish_key_exchange(self, server):
         """
@@ -77,7 +79,7 @@ class Client():
         # Before it will be sent to the server
         key_encrypted = bf.encryption(self.blowfish_key)
 
-        print("\nBlowfish Key before Encryption:\t", self.blowfish_key)
+        print("Blowfish Key before Encryption:\t", self.blowfish_key)
         print("Encrypted Blowfish Key:\t\t", key_encrypted)
         print("\nSent to server authentication ... \nAwaiting response ... \n")
 
@@ -92,7 +94,7 @@ class Client():
         validation_success = False
         while (validation_success is False):
             if (self.username is not ""):
-                print("Login Failed!\nInvalid username or password - try again\n")
+                print("\nLogin Failed!\nInvalid username or password - try again\n")
 
             username, password = self.login_prompt()
             print("\nSent to server authentication ... \nAwaiting response ... \n")

@@ -47,8 +47,12 @@ class Server():
         For simulation purposes, it is for a predefined user "Dima",
         with password 1234 hashed with 256-sha algorithm.
         """
+        print("Received Hashed Password:\t\t", password)
+        print("Hashed Password in Database:\t\t",
+              self.simulation_hashed_password)
         self.verify_signature(username + password, signature,
                               "Login Credentials")
+
         return (username == self.simulation_username and password == self.simulation_hashed_password)
 
     def validate_blowfish_key_exchange(self, key_encrypted, signature):

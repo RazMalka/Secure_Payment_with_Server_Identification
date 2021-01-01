@@ -61,7 +61,6 @@ class Blowfish():
     def encryption(self, data):
         """
         This function performs encryption of data with blowfish.
-
         """
         L = data >> 32  # get the left 32 bit
         R = data & 0xffffffff  # get the right 32 bit
@@ -92,7 +91,7 @@ class Blowfish():
     def decryption(self, data):
         """
         This function performs decryption of data with blowfish.
-        The reverse of the encryption
+        It reverses the encryption.
         """
         L = data >> 32  # get the left 32 bit
         R = data & 0xffffffff  # get the right 32 bit
