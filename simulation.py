@@ -14,7 +14,12 @@ def start():
     # Define a Coordinate Tuple
     Coord = collections.namedtuple("Coord", ["x", "y"])
 
-    # Initialize an elliptic curve
+    # Initialize an elliptic curve by Secp256k1 Parameters.
+    # Secp256k1 is the elliptic curve used in Bitcoin's public-key cryptography,
+    # and is defined in Standards for Efficient Cryptography (SEC)
+    # (Certicom Research, http://www.secg.org/sec2-v2.pdf).
+    # Currently Bitcoin uses secp256k1 with the ECDSA algorithm
+
     big_prime = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffefffffc2f
     order = 0xfffffffffffffffffffffffffffffffebaaedce6af48a03bbfd25e8cd0364141
     Gx = 0x79be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798
