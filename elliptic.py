@@ -19,7 +19,6 @@ def egcd(a, b):
         q, r = divmod(a, b)
         a, b = b, r
         s0, s1, t0, t1 = s1, s0 - q * s1, t1, t0 - q * t1
-        pass
     return s0, t0, a
 
 
@@ -31,13 +30,16 @@ class EC(object):
         """
         assert 0 <= a and a < q and 0 <= b and b < q and q > 2
         assert (4 * (a ** 3) + 27 * (b ** 2)) % q != 0
-        self.a = a
-        self.b = b
-        self.q = q
-        self.G = G
-        self.zero = Coord(0, 0)
+        self.a = a                  # Coefficient of x
+        self.b = b                  # Constant term
+        self.q = q                  # Large prime number
+        self.G = G                  # Generator point / Base point
+        self.zero = Coord(0, 0)     # Zero point
+
+        # Order -
+        # An elliptic curve defined over a finite field has a finite number of points.
+        # The number of points in a group is called the order of the group.
         self.order = order
-        pass
 
     def add(self, p1: Coord, p2: Coord):
         """This function returns the addition of two points on the elliptic curve"""
@@ -56,7 +58,6 @@ class EC(object):
             temp1 = (p2.y - p1.y)
             temp2 = inv(p2.x - p1.x, self.q)
             l = temp1 * temp2 % self.q
-            pass
         x = (l * l - p1.x - p2.x) % self.q
         y = (l * (p1.x - x) - p1.y) % self.q
         return Coord(x, y)
@@ -69,7 +70,5 @@ class EC(object):
         while 0 < n:
             if n & 1 == 1:
                 r = self.add(r, m2)
-                pass
             n, m2 = n >> 1, self.add(m2, m2)
-            pass
         return r
