@@ -99,7 +99,7 @@ class Server():
             self.ec, message, signature, self.Qa)
         if (result is True):
             print(
-                "Elliptic Curve Digital Signature Algorithm (ECDSA) Check Passed Successfully! -", purpose)
+                "ECDSA Check Passed Successfully! -", purpose)
         else:
             print(
                 "Invalid Signature - Elliptic Curve Digital Signature Algorithm (ECDSA) -", purpose)

@@ -4,8 +4,8 @@ import blowfish_const as const
 class Blowfish():
     def __init__(self, key):
         """
-        Initialize new pbox and sbox for blowfish instance,
-        and calls initialize for pbox.
+        Initialize new p-array and sbox for blowfish instance,
+        and calls initialize for p-array.
         """
         self.p_new = const.p.copy()  # p[i] is initialized with pi() values
         self.p = const.p.copy()
@@ -41,8 +41,8 @@ class Blowfish():
 
     def initialize(self, key):
         """
-        Initialize p-box using xor with 18 subkeys.
-        This function initializes the pbox with xor between it with input key.
+        Initialize p-array using xor with 18 subkeys.
+        This function initializes the p-array with xor between it with input key.
         The p[i] array is already initialized with pi() numbers
         The new p[i] gets the value of oldP[i] xor key[i]
         """
