@@ -41,7 +41,7 @@ class Client():
         """
         This function generates a private and public keys.
         """
-        self.private_key = random.randint(1, self.ec.q)
+        self.private_key = random.randint(1, self.ec.Prime)
         self.public_key = self.ec.mul(self.ec.G, self.private_key)
 
     def generate_shared_key(self, server):
@@ -50,7 +50,7 @@ class Client():
         """
         signature = ecdsa.Ecdsa.sign(
             self.ec, self.public_key, self.private_key)
-
+        # returned_public_key from server
         returned_public_key, returned_signature = server.generate_shared_key(
             self.public_key, signature)
 
