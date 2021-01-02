@@ -1,2 +1,4 @@
 # SPBF
-Secure payment with server identification using Eliptic protocol signature and key excange, encryption-decryption with Blowfish checking with SHA-256.
+Secure Payment with Server Identification using Elliptic Protocol 
+Digital Signature and Key Exchange, Blowfish Cipher and SHA-256.
+
