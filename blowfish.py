@@ -61,6 +61,9 @@ class Blowfish():
         """
         This function performs encryption of data with blowfish.
         """
+        if (data > 2**64 - 1):  # MAX UINT64
+            print("Invalid Data - Larger Than 64-bit")
+            exit(1)
         # Encryption algorithm implemented from pseudo-code
         # As described in Bruce Schneier's Workshop Article:
         # https://www.schneier.com/academic/archives/1994/09/description_of_a_new.html
